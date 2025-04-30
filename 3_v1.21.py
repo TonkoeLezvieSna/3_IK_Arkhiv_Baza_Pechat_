@@ -1045,6 +1045,11 @@ def move_to_final_location(card_data, word_file_path, excel_file_path=None):
     try:
         logging.info("Начало перемещения файлов в финальные папки")
         
+        # Преобразуем пути в объекты Path, если они строками
+        word_file_path = Path(word_file_path) if isinstance(word_file_path, str) else word_file_path
+        if excel_file_path:
+            excel_file_path = Path(excel_file_path) if isinstance(excel_file_path, str) else excel_file_path
+        
         # Определяем финальную папку на основе оригинальной логики
         if card_data.get("1") == "Образец СВО Молов прямая идентификация":
             final_folder = Path(r"F:\ГЕНЕТИКА НОВОЕ ЗДАНИЕ\Ростов СВО\Личные профили 2-ДНК (прямая идентификация)")
@@ -1067,8 +1072,8 @@ def move_to_final_location(card_data, word_file_path, excel_file_path=None):
         logging.info(f"Word-файл успешно перемещен: {final_word_path}")
 
         # Перемещаем Excel-файл, если он существует
-        if excel_file_path and excel_file_path.exists():
-            final_excel_path = final_folder / excel_file_path.name
+        if excel_file_path and Path(excel_file_path).exists():
+            final_excel_path = final_folder / Path(excel_file_path).name
             logging.info(f"Перемещение Excel-файла: {excel_file_path} -> {final_excel_path}")
             shutil.move(str(excel_file_path), str(final_excel_path))
             logging.info(f"Excel-файл успешно перемещен: {final_excel_path}")
