@@ -38,6 +38,117 @@ def show_error_message(message):
     messagebox.showerror("Ошибка", message)
     root.destroy()
 
+def show_fio_warning(card_data):
+    """Показывает предупреждение о проверке ФИО для определенных шаблонов"""
+    if card_data.get("1") in ["Образец СВО Молов фонд", "Образец СВО Ростов", "Образец СВО Молов прямая идентификация"]:
+        root = tk.Tk()
+        root.withdraw()
+        
+        message_window = tk.Toplevel(root)
+        message_window.title("Внимание!")
+        message_window.geometry("500x150")
+        message_window.protocol("WM_DELETE_WINDOW", lambda: (message_window.destroy(), root.quit()))
+        
+        message_window.bind('<Escape>', lambda e: (message_window.destroy(), root.quit()))
+        message_window.bind('<Return>', lambda e: (message_window.destroy(), root.quit()))
+        
+        label = tk.Label(
+            message_window, 
+            text="Проверь ФИО в именительном падеже!", 
+            font=("Arial", 16, "bold"), 
+            fg="red"
+        )
+        label.pack(expand=True, fill="both", padx=20, pady=20)
+        
+        ok_button = tk.Button(
+            message_window, 
+            text="OK (Enter)", 
+            command=lambda: (message_window.destroy(), root.quit()),
+            font=("Arial", 12)
+        )
+        ok_button.pack(pady=10)
+        
+        message_window.after(100, lambda: (
+            ok_button.focus_force(),
+            message_window.attributes('-topmost', True)
+        ))
+        
+        message_window.update_idletasks()
+        width = message_window.winfo_width()
+        height = message_window.winfo_height()
+        x = (message_window.winfo_screenwidth() // 2) - (width // 2)
+        y = (message_window.winfo_screenheight() // 2) - (height // 2)
+        message_window.geometry(f'+{x}+{y}')
+        
+        root.mainloop()
+
+def show_final_reminder():
+    """Показывает финальное напоминание о необходимых действиях"""
+    root = None
+    message_window = None
+    
+    try:
+        root = tk.Tk()
+        root.withdraw()
+        
+        message_window = tk.Toplevel(root)
+        message_window.title("ВАЖНО!")
+        message_window.geometry("600x300")
+        message_window.protocol("WM_DELETE_WINDOW", lambda: (message_window.destroy(), root.quit()))
+        
+        message_window.bind('<Escape>', lambda e: (message_window.destroy(), root.quit()))
+        message_window.bind('<Return>', lambda e: (message_window.destroy(), root.quit()))
+        
+        label = tk.Label(
+            message_window, 
+            text="""1. ВНЕСИ ДАННЫЕ В 1С
+    2. ЗАПОЛНИ ЖУРНАЛ
+    3. ЗАПОЛНИ ПОДПИСКУ
+    4. СДАЙ ОБЪЕКТЫ!""", 
+            font=("Arial", 20, "bold"), 
+            fg="red"
+        )
+        label.pack(expand=True, fill="both", padx=20, pady=50)
+        
+        ok_button = tk.Button(
+            message_window, 
+            text="OK (Enter)", 
+            command=lambda: (message_window.destroy(), root.quit()),
+            font=("Arial", 14)
+        )
+        ok_button.pack(pady=10)
+        
+        message_window.after(100, lambda: (
+            ok_button.focus_force(),
+            message_window.attributes('-topmost', True)
+        ))
+        
+        message_window.update_idletasks()
+        width = message_window.winfo_width()
+        height = message_window.winfo_height()
+        x = (message_window.winfo_screenwidth() // 2) - (width // 2)
+        y = (message_window.winfo_screenheight() // 2) - (height // 2)
+        message_window.geometry(f'+{x}+{y}')
+        
+        root.mainloop()
+    except Exception as e:
+        logging.error(f"Ошибка при создании окна напоминания: {e}")
+        raise
+    finally:
+        # Гарантированная очистка оконных ресурсов
+        if message_window is not None:
+            try:
+                message_window.destroy()
+            except Exception as e:
+                logging.debug(f"Ошибка при закрытии message_window: {e}")
+        
+        if root is not None:
+            try:
+                root.quit()
+                root.destroy()
+            except Exception as e:
+                logging.debug(f"Ошибка при закрытии root: {e}")
+
 # Функция для сортировки данных по локусам
 def sort_data_by_locus(data):
     def get_locus_index(locus):
@@ -1120,6 +1231,9 @@ def main():
             logging.error(f"Ошибка при проверке обязательных полей: {e}")
             raise
 
+        # Показываем предупреждение о ФИО, если нужно
+        show_fio_warning(card_data)
+
         # Проверяем, является ли файл особым типом "Кость СВО нет пригодной ДНК"
         is_special_case = card_data.get("1") == "НАЗВАНИЕ ШАБЛОНА ДЛЯ КОСТЕЙ"
         
@@ -1333,75 +1447,11 @@ def main():
         
     finally:
         try:
-            # Создаем окно с сообщением
-            root = tk.Tk()
-            root.withdraw()
-            
-            message_window = tk.Toplevel(root)
-            message_window.title("ВАЖНО!")
-            message_window.geometry("600x300")
-            message_window.protocol("WM_DELETE_WINDOW", lambda: (message_window.destroy(), root.quit()))
-            
-            # Привязка клавиш
-            message_window.bind('<Escape>', lambda e: (message_window.destroy(), root.quit()))
-            message_window.bind('<Return>', lambda e: (message_window.destroy(), root.quit()))
-            
-            # Текст сообщения
-            label = tk.Label(
-                message_window, 
-                text="""1. ВНЕСИ ДАННЫЕ В 1С
-2. ЗАПОЛНИ ЖУРНАЛ
-3. ЗАПОЛНИ ПОДПИСКУ
-4. СДАЙ ОБЪЕКТЫ!""", 
-                font=("Arial", 20, "bold"), 
-                fg="red"
-            )
-            label.pack(expand=True, fill="both", padx=20, pady=50)
-            
-            # Кнопка OK
-            ok_button = tk.Button(
-                message_window, 
-                text="OK (Enter)", 
-                command=lambda: (message_window.destroy(), root.quit()),
-                font=("Arial", 14)
-            )
-            ok_button.pack(pady=10)
-            
-            # Настройка фокуса
-            message_window.after(100, lambda: (
-                ok_button.focus_force(),
-                message_window.attributes('-topmost', True)
-            ))
-            
-            # Центрирование окна
-            message_window.update_idletasks()
-            width = message_window.winfo_width()
-            height = message_window.winfo_height()
-            x = (message_window.winfo_screenwidth() // 2) - (width // 2)
-            y = (message_window.winfo_screenheight() // 2) - (height // 2)
-            message_window.geometry(f'+{x}+{y}')
-            
-            # Запускаем главный цикл
-            root.mainloop()
-            
+            show_final_reminder()  # Вызываем функцию
         except Exception as e:
-            logging.error(f"Ошибка в окне сообщения: {e}")
+            logging.error(f"Не удалось показать финальное напоминание: {e}")
         finally:
-            # Гарантированная очистка
-            try:
-                if 'message_window' in locals():
-                    message_window.destroy()
-            except:
-                pass
-                
-            try:
-                if 'root' in locals():
-                    root.quit()
-                    root.destroy()
-            except:
-                pass
-            
-            # Принудительный сбор мусора
+            # Дополнительная гарантированная очистка
             import gc
             gc.collect()
             
