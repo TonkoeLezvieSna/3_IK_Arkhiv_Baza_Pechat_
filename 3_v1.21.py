@@ -135,7 +135,7 @@ def show_final_reminder():
         logging.error(f"Ошибка при создании окна напоминания: {e}")
         raise
     finally:
-        # Гарантированная очистка оконных ресурсов
+        # Очистка оконных ресурсов
         if message_window is not None:
             try:
                 message_window.destroy()
