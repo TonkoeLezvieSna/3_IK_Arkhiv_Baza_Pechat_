@@ -3437,10 +3437,27 @@ def main():
                     src_doc.Close(SaveChanges=constants.wdDoNotSaveChanges)
                     dst_doc.Close(SaveChanges=constants.wdDoNotSaveChanges)
 
-                    # Перемещаем результирующий файл
-                    final_folder = Path(r"U:\ГЕНЕТИКА НОВОЕ ЗДАНИЕ\Ростов СВО")
-                    final_folder.mkdir(parents=True, exist_ok=True)
+                    # Определяем финальную папку в зависимости от шаблона
+                    template = card_data.get("1")
+                    if template in ["СВО_Ростов_образец_прямая идентификация_нет результата_RT", "СВО_Ростов_образец_прямая идентификация_нет результата_форез"]:
+                        final_folder = Path(r"U:\ГЕНЕТИКА НОВОЕ ЗДАНИЕ\Ростов СВО\Личные профили 2-ДНК (прямая идентификация)")
+                        logging.info(f"Обнаружен шаблон прямой идентификации (Ростов). Файл будет направлен в: {final_folder}")
+                    elif template in ["СВО_Ростов_образец_родственники_нет результата_RT", "СВО_Ростов_образец_родственники_нет результата_форез"]:
+                        final_folder = Path(r"U:\ГЕНЕТИКА НОВОЕ ЗДАНИЕ\Ростов СВО\Родственники с 2-ДНК Ростов")
+                        logging.info(f"Обнаружен шаблон родственников (Ростов). Файл будет направлен в: {final_folder}")
+                    elif template in ["СВО_Молов_образец_родственники_нет результата_RT", "СВО_Молов_образец_родственники_нет результата_форез"]:
+                        final_folder = Path(r"U:\ГЕНЕТИКА НОВОЕ ЗДАНИЕ\Ростов СВО\Родственники с 2-ДНК Тюмень")
+                        logging.info(f"Обнаружен шаблон родственников (Молов/Тюмень). Файл будет направлен в: {final_folder}")
+                    else:
+                        # Запасной вариант, если шаблон не распознан
+                        final_folder = Path(r"U:\ГЕНЕТИКА НОВОЕ ЗДАНИЕ\Ростов СВО")
+                        logging.warning(f"Шаблон '{template}' не распознан. Файл будет направлен в папку по умолчанию: {final_folder}")
                     
+                    # Создаём финальную папку, если она не существует
+                    final_folder.mkdir(parents=True, exist_ok=True)
+                    logging.info(f"Финальная папка готова: {final_folder}")
+                    
+                    # Перемещаем результирующий файл
                     for attempt in range(max_attempts):
                         try:
                             shutil.move(str(result_file_path), str(final_folder / result_file_name))
